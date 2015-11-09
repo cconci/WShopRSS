@@ -6,8 +6,8 @@
 Includes
 ******************************************************************************/
 
-require 'WShopDefines.php';
-require 'WShopDatabaseWrapper.php';
+require 'wShopDefines.php';
+require '../share/WShopDatabaseWrapper.php';
 
 require '../share/WShopItemListing.php';
 
@@ -108,6 +108,8 @@ function getItemInfoFromWebPage($itemCode)
 	//parse the pageData
 
 	//store in our object
+	$itemListing->setListingURL($url);
+	$itemListing->setListingDateTimeStampEpoch(time());
 	$itemListing->setListingItemCode($itemCode);
 
 	//Get Title
@@ -118,15 +120,17 @@ function getItemInfoFromWebPage($itemCode)
 	//Get Images
 	$imageBreak1 = explode('<div class="column auctionImages">',$pageData);
 	$imageBreak2 = explode('<div class="previewImages">',$imageBreak1[1]);
-	$imageBraak3 = explode('<a href="',$imageBreak2[1]);
+	$imageBreak3 = explode('</div>',$imageBreak2[1]);
+
+	$imageBraak4 = explode('<a href="',$imageBreak3[0]);
 	
 	$imagesArray = array();	
 
 	//i=1, skip the first as it is not what we need
-	for($i=1;$i<count($imageBraak3);$i++)
+	for($i=1;$i<count($imageBraak4);$i++)
 	{
 		//strip the part of the lunk we do NOT need
-		$imagesArray[$i-1] =  explode('"',$imageBraak3[$i])[0];
+		$imagesArray[$i-1] =  explode('"',$imageBraak4[$i])[0];
 	}
 
 	$itemListing->setListingImageLinks($imagesArray);
@@ -135,13 +139,19 @@ function getItemInfoFromWebPage($itemCode)
 	$descripBreak1 = explode('<div itemprop="description">',$pageData);
 	$descripBreak2 = explode('<div id="postage">',$descripBreak1[1]);
 
-	$itemListing->setListingDescription($descripBreak2[0]);
+	//clear white space and tabs and spaces
+	$cleanStr = str_replace('/\s+/g', '', trim(strip_tags($descripBreak2[0])));	
+
+	$itemListing->setListingDescription($cleanStr);
 
 	//Contact
 	$contactBreak1 = explode('<div class="contactDetails">',$pageData);
 	$contactBreak2 = explode('</div>',$contactBreak1[1]);
 	
-	$itemListing->setListingStoreAddress($contactBreak2[0]);
+	//clear white space and tabs and spaces
+	$cleanStr = str_replace('/\s+/g', '', trim(strip_tags($contactBreak2[0])));	
+
+	$itemListing->setListingStoreAddress($cleanStr);
 
 	//Store Name
 	$nameBreak1 = explode('<div class="column auctionStore">',$pageData);
@@ -154,8 +164,6 @@ function getItemInfoFromWebPage($itemCode)
 	$timeLeftBreak1 = explode('<p class="auctionTimeLeft" >',$pageData);
 	if(count($timeLeftBreak1) > 1)
 	{
-
-		echo "::".count($timeLeftBreak1)."\n";
 		$timeLeftBreak2 = explode('>',$timeLeftBreak1[1]);
 		$timeLeftBreak3 = explode('<',$timeLeftBreak2[1]);
 
@@ -206,7 +214,8 @@ function getItemInfoFromWebPage($itemCode)
 	$catBreak3 = explode('/',$catBreak2[1]);
 
 	$itemListing->setListingCategorie($catBreak3[0]);
-	
+
+	$itemListing->printListing();	
 
 	return $itemListing;
 }
