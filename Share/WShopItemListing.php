@@ -4,6 +4,7 @@ class WShopItemListing
 {
 	//DB columns
 	private $entryID;	
+	private $valid;
 
 	private $listingItemCode;		//Number in the URL that IDs a product
 	private $listingTitle;
@@ -23,8 +24,9 @@ class WShopItemListing
 
 	
 	public function __construct()
-	{
+	{		
 		$this->entryID = "";
+		$this->valid = false;
 		$this->listingItemCode = "";
 		$this->listingTitle = "";
 		$this->listingTimeLeftAtScrapeTIme = "";
@@ -48,6 +50,10 @@ class WShopItemListing
 	}
 
 	//Getters
+	public function getIfValid()
+	{
+		return $this->valid;
+	}
 	public function getListingItemCode()
 	{
 		return $this->listingItemCode;
@@ -80,6 +86,17 @@ class WShopItemListing
 	{
 		return $this->listingImageLinks;
 	}
+	public function getListingImageLinksAsString()
+	{
+		$retString = "";
+
+		for($i=0;$i<count($this->listingImageLinks);$i++)
+		{
+			$retString .= $this->listingImageLinks[$i].",";
+		}
+
+		return $retString;
+	}
 	public function getListingStoreName()
 	{
 		return $this->listingStoreName;
@@ -110,6 +127,10 @@ class WShopItemListing
 	}
 
 	//Setters
+	public function setIfValid($valid)
+	{
+		$this->valid = $valid;
+	}
 	public function setListingItemCode($itemCode)
 	{
 		$this->listingItemCode = $itemCode;
@@ -195,6 +216,7 @@ class WShopItemListing
 		echo "listingCategorie:".$this->listingCategorie."\n";
 		echo "listingURL:".$this->listingURL."\n";
 		echo "listingDateTimeStampEpoch:".$this->listingDateTimeStampEpoch."\n";
+		echo "getlistingImageLinksAsString():".$this->getListingImageLinksAsString()."\n";
 	}
 
 }

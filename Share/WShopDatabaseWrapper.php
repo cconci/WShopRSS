@@ -3,8 +3,8 @@
 /******************************************************************************
 Includes
 ******************************************************************************/
-require '../share/WShopDatabaseAccess.php';
-require '../share/WShopItemListing.php';
+require_once '../Share/WShopDatabaseAccess.php';
+require_once '../Share/WShopItemListing.php';
 
 /******************************************************************************
 Defines
@@ -86,7 +86,7 @@ function databaseInsertWShopItemListing($itemListing)
 
 		."listingURL"
 		.")" 
-		."VALUES (?,?,?,?,?,?,?,?,?,?)"
+		."VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
 	);
 
 	/*
@@ -97,7 +97,7 @@ function databaseInsertWShopItemListing($itemListing)
 			b - BLOB
 	*/
 	//Bind, the all are int so we use 'i'
-	$stmt->bind_param("sssdddsssssssis", 
+	$result = $stmt->bind_param("sssssssssssssis",
 		$listingItemCode,
 		$listingTitle,
 		$listingTimeLeftAtScrapeTIme,
@@ -115,6 +115,13 @@ function databaseInsertWShopItemListing($itemListing)
 		$listingURL
 	);
 
+	if($result == false)
+	{
+		//error
+		echo "SQL ERROR\n";
+		return;
+	}
+
 	//set real parameters
 	$listingItemCode 					= $itemListing->getListingItemCode();
 	$listingTitle						= $itemListing->getListingTitle();
@@ -123,7 +130,7 @@ function databaseInsertWShopItemListing($itemListing)
 	$listingBuyItNowPrice			= $itemListing->getListingBuyItNowPrice();
 	$listingPostagePrice				= $itemListing->getListingPostagePrice();
 	$listingDescription				= $itemListing->getListingDescription();
-	$listingImageLinks				= $itemListing->getListingImageLinks();
+	$listingImageLinks				= $itemListing->getListingImageLinksAsString();
 	$listingStoreName					= $itemListing->getListingStoreName();
 	$listingStoreAddress				= $itemListing->getListingStoreAddress();
 	$listingStockNumber				= $itemListing->getListingStockNumber();
@@ -138,11 +145,53 @@ function databaseInsertWShopItemListing($itemListing)
 	$stmt->close();
 	$conn->close();
 }
+/*
+Takes an 'wShopItemListing' onject as a param and uses the details to update the database
+*/
+function databaseUpdateScraperRunInfo($itemListing)
+{
+	//New connection
+	$conn = new mysqli(constant("DB_SERVER"), constant("DB_USER"), constant("DB_USER_PASS"), constant("DB_NAME"));
+
+	//error check
+	if ($conn->connect_error) 
+	{
+		 die("Connection failed: " . $conn->connect_error);
+	}
+
+	//prepare
+	//there is only one row in this table so we cam skip the where
+	$stmt = $conn->prepare("UPDATE scraper_info SET lastScrapedStockNumber=?, lastScrapeTimeStampEpoch=?, lastScrapedItemCode=?");
+
+	$result = $stmt->bind_param("sis", 
+		$lastScrapedStockNumber, 
+		$lastScrapeTimeStampEpoch, 
+		$lastScrapedItemCode
+	);
+
+	if($result == false)
+	{
+		//error
+		echo "SQL ERROR\n";
+		return;
+	}
+
+	//set real parameters
+	$lastScrapedStockNumber 			= $itemListing->getListingStockNumber();
+	$lastScrapeTimeStampEpoch 			= time();	//epoch seconds
+	$lastScrapedItemCode 				= $itemListing->getListingItemCode();
+
+	$stmt->execute();
+	
+	//clean up
+	$stmt->close();
+	$conn->close();
+}
 
 /******************************************************************************
 Debug
 ******************************************************************************/
 
-databaseInsertScraperRunResults(5,155);
+//databaseInsertScraperRunResults(5,155);
 
 ?>

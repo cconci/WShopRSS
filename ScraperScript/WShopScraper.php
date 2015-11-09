@@ -6,10 +6,9 @@
 Includes
 ******************************************************************************/
 
-require 'wShopDefines.php';
-require '../share/WShopDatabaseWrapper.php';
-
-require '../share/WShopItemListing.php';
+require_once 'WShopDefines.php';
+require_once '../Share/WShopDatabaseWrapper.php';
+require_once '../Share/WShopItemListing.php';
 
 /******************************************************************************
 Defines
@@ -111,6 +110,7 @@ function getItemInfoFromWebPage($itemCode)
 	$itemListing->setListingURL($url);
 	$itemListing->setListingDateTimeStampEpoch(time());
 	$itemListing->setListingItemCode($itemCode);
+	$itemListing->setIfValid(true);
 
 	//Get Title
 	$titleBreak1 = explode('<h1 itemprop="name" data-editable="true">',$pageData);
@@ -140,9 +140,11 @@ function getItemInfoFromWebPage($itemCode)
 	$descripBreak2 = explode('<div id="postage">',$descripBreak1[1]);
 
 	//clear white space and tabs and spaces
-	$cleanStr = str_replace('/\s+/g', '', trim(strip_tags($descripBreak2[0])));	
+	$cleanStr = trim(strip_tags($descripBreak2[0]));	
+	
+	$cleanDescription = cleanWhiteSpaceFromStartOfEachLine($cleanStr);
 
-	$itemListing->setListingDescription($cleanStr);
+	$itemListing->setListingDescription($cleanDescription);
 
 	//Contact
 	$contactBreak1 = explode('<div class="contactDetails">',$pageData);
@@ -151,7 +153,7 @@ function getItemInfoFromWebPage($itemCode)
 	//clear white space and tabs and spaces
 	$cleanStr = str_replace('/\s+/g', '', trim(strip_tags($contactBreak2[0])));	
 
-	$itemListing->setListingStoreAddress($cleanStr);
+	$itemListing->setListingStoreAddress(cleanWhiteSpaceFromStartOfEachLine($cleanStr));
 
 	//Store Name
 	$nameBreak1 = explode('<div class="column auctionStore">',$pageData);
@@ -183,6 +185,11 @@ function getItemInfoFromWebPage($itemCode)
 	$postageBreak1 = explode('<p class="postage ui-helper-clearfix">',$pageData);
 	$postageBreak2 = explode('>',$postageBreak1[1]);
 	$postageBreak3 = explode('>',$postageBreak2[1]);
+
+	if(strstr($postageBreak3[0],"</span"))
+	{
+		$postageBreak3[0] = str_replace("</span",'',$postageBreak3[0]);
+	}
 
 	$itemListing->setListingPostagePrice($postageBreak3[0]);
 
@@ -220,14 +227,42 @@ function getItemInfoFromWebPage($itemCode)
 	return $itemListing;
 }
 
+function itemIsOfInterest($itemListing)
+{
+	//check for Categories I want
+
+	//check for key words in title and description
+
+	return true;
+}
+
+function cleanWhiteSpaceFromStartOfEachLine($str)
+{
+	//remove white space on each line
+	$clearStrBreak1 = explode ("\n",$str);
+
+	$clearStr = "";
+
+	for($i=0;$i<count($clearStrBreak1);$i++)
+	{
+		if(strlen(trim($clearStrBreak1[$i])) > 1)
+		{
+			//echo "#".$clearStrBreak1[$i]."";
+			$clearStr .= trim($clearStrBreak1[$i])."\n";
+		}
+	}
+
+	return $clearStr;
+}
+
 /******************************************************************************
 Main Script
 ******************************************************************************/
 
 //get last scanned item data(code) and last scanned item stock number from DB
 
-$currentDatabaseItemCode = 2350958; //write the DB stuff
-
+$currentDatabaseItemCode = 2353040; //write the DB stuff
+									
 $currentWebPageItemCode = getCurrentItemCodeFromWebPage();
 
 echo "Web Page current item code:".$currentWebPageItemCode."\n";
@@ -243,14 +278,22 @@ if($currentWebPageItemCode != constant("SCRAPER_ERROR"))
 		//extract needed info from the page
 		$itemDetails = getItemInfoFromWebPage($currentDatabaseItemCode);
 
-		if($itemDetails != constant("SCRAPER_ERROR"))
+		if($itemDetails->getIfValid() == true)
 		{
 			//check if it is an item we want to know about
+			if(itemIsOfInterest($itemDetails) == true)
+			{
+				//add its info to the database
+				databaseInsertWShopItemListing($itemDetails);
 
-			//add its info to the database
+				//Update the last scrape table
+				databaseUpdateScraperRunInfo($itemDetails);
 
-			//add a delay timer if needed, to make the requests staggered, eg not predictable
+			}
 		}
+
+		//add a delay timer if needed, to make the requests staggered, eg not predictable
+
 	}
 }
 else
@@ -259,6 +302,8 @@ else
 }
 
 //update stats table for run info
+
+echo "Done!!!\n"
 
 ?>
 
