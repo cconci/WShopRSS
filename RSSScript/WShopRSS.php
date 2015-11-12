@@ -14,25 +14,26 @@ Defines
 ******************************************************************************/
 //define("SCRAPER_ERROR",-1);
 
+define('BUILD_DATE',date('r',1458736991)); //epoch of last time I updated the file
+
 /******************************************************************************
 Support Functions
 ******************************************************************************/
 function generateRSSChannelBlockContent()
 {
 	$RSSfeed = "";
+	$contentDate = date('r');	//From the DB, last scraper run info
 	
 	$RSSfeed .= "		<title>WShop RSS Feed</title>\n";
-	$RSSfeed .= "		<link>http:// ---- .com</link>";
+	//$RSSfeed .= "		<link>http:// ---- .com</link>";
 	$RSSfeed .= "		<description>RSS Feed for Items of Interest from WShop</description>\n";
 	$RSSfeed .= "		<language>en-us</language>\n";
-
-	$RSSfeed .= "		<pubDate>".date('r')."</pubDate>\n";
-	//   <lastBuildDate>Tue, 10 Jun 2003 09:41:01 GMT</lastBuildDate>
-	//   <docs>http://blogs.law.harvard.edu/tech/rss</docs>
-	//   <generator>Weblog Editor 2.0</generator>
-	//   <managingEditor>editor@example.com</managingEditor>
-	//   <webMaster>webmaster@example.com</webMaster>
-	*/
+	$RSSfeed .= "		<pubDate>".$contentDate."</pubDate>\n"; 
+	$RSSfeed .= "		<lastBuildDate>".$contentDate."</lastBuildDate>\n";
+	//$RSSfeed .= "		<docs>http://blogs.law.harvard.edu/tech/rss</docs>\n";
+	$RSSfeed .= "		<generator>gedit</generator>\n";
+	//$RSSfeed .= "		<managingEditor>editor@example.com</managingEditor>\n";
+	//$RSSfeed .= "		<webMaster>webmaster@example.com</webMaster>\n";
 
 	return $RSSfeed;
 }

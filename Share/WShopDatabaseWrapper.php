@@ -83,7 +83,6 @@ function databaseInsertWShopItemListing($itemListing)
 		."listingIsAlreadySold,"
 		."listingCategorie,"
 		."listingDateTimeStampEpoch,"
-
 		."listingURL"
 		.")" 
 		."VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
@@ -186,6 +185,104 @@ function databaseUpdateScraperRunInfo($itemListing)
 	//clean up
 	$stmt->close();
 	$conn->close();
+}
+
+function databaseSelectWShopItemListingsFromTheLastXDays($numberOfDays)
+{
+	//New connection
+	$conn = new mysqli(constant("DB_SERVER"), constant("DB_USER"), constant("DB_USER_PASS"), constant("DB_NAME"));
+
+	//error check
+	if ($conn->connect_error) 
+	{
+		 die("Connection failed: " . $conn->connect_error);
+	}
+
+	$stmt = $conn->prepare("SELECT "
+		."listingItemCode,"
+		."listingTitle,"
+		."listingTimeLeftAtScrapeTIme,"
+		."listingCurrentPrice,"
+		."listingBuyItNowPrice,"
+		."listingPostagePrice,"
+		."listingDescription,"
+		."listingImageLinks,"
+		."listingStoreName,"
+		."listingStoreAddress,"
+		."listingStockNumber,"
+		."listingIsAlreadySold,"
+		."listingCategorie,"
+		."listingDateTimeStampEpoch,"
+		."listingURL"
+
+		." FROM rss_feed WHERE listingDateTimeStampEpoch < ?");
+
+	$result = $stmt->bind_param("i", 
+		$cutOffEpoch, 
+	);
+
+	if($result == false)
+	{
+		//error
+		echo "SQL ERROR\n";
+		return;
+	}
+
+	//set real parameters
+
+	$cutOffEpoch 			= time() - ($numberOfDays * (60*60*24));	//epoch seconds
+
+
+	$stmt->execute();
+
+	//bind variables to prepared statement
+	$stmt->bind_result(
+		$listingItemCode,
+		$listingTitle,
+		$listingTimeLeftAtScrapeTIme,
+		$listingCurrentPrice,
+		$listingBuyItNowPrice,
+		$listingPostagePrice,
+		$listingDescription,
+		$listingImageLinks,
+		$listingStoreName,
+		$listingStoreAddress,
+		$listingStockNumber,
+		$listingIsAlreadySold,
+		$listingCategorie,
+		$listingDateTimeStampEpoch,
+		$listingURL
+	);
+
+	// fetch values 
+	while ($stmt->fetch()) 
+	{
+		echo "".$listingItemCode."\n";
+		echo "".$listingTitle."\n";
+		echo "".$listingTimeLeftAtScrapeTIme."\n";
+		echo "".$listingCurrentPrice."\n";
+		echo "".$listingBuyItNowPrice."\n";
+		echo "".$listingPostagePrice."\n";
+		echo "".$listingDescription."\n";
+		echo "".$listingImageLinks."\n";
+		echo "".$listingStoreName."\n";
+		echo "".$listingStoreAddress."\n";
+		echo "".$listingStockNumber."\n";
+		echo "".$listingIsAlreadySold."\n";
+		echo "".$listingCategorie."\n";
+		echo "".$listingDateTimeStampEpoch."\n";
+		echo "".$listingURL."\n";
+
+		//add to Listing Item array
+
+	}
+
+	//clean up
+	$stmt->close();
+	$conn->close();
+
+	//return out itemListings
+
 }
 
 /******************************************************************************
