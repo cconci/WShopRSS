@@ -122,15 +122,22 @@ function getItemInfoFromWebPage($itemCode)
 	$imageBreak2 = explode('<div class="previewImages">',$imageBreak1[1]);
 	$imageBreak3 = explode('</div>',$imageBreak2[1]);
 
-	$imageBraak4 = explode('<a href="',$imageBreak3[0]);
-	
+	$imageBreak4 = explode('<a href="',$imageBreak3[0]);
+
+	//Get main image also (sometimes there is no other images)	
+	$imageBreak2m = explode('<div class="previewImage">',$imageBreak1[1]);
+	$imageBreak3m = explode('<a href="',$imageBreak2m[1]);
+	$imageBreak4m = explode('"',$imageBreak3m[1]);
+
 	$imagesArray = array();	
 
+	$imagesArray[0] =  constant("URL_TOP_LEVEL")."".$imageBreak4m[0];
+
 	//i=1, skip the first as it is not what we need
-	for($i=1;$i<count($imageBraak4);$i++)
+	for($i=1;$i<count($imageBreak4);$i++)
 	{
-		//strip the part of the lunk we do NOT need
-		$imagesArray[$i-1] =  explode('"',$imageBraak4[$i])[0];
+		//strip the part of the link we do NOT need
+		$imagesArray[$i] =  constant("URL_TOP_LEVEL")."".explode('"',$imageBreak4[$i])[0];
 	}
 
 	$itemListing->setListingImageLinks($imagesArray);
@@ -261,7 +268,7 @@ Main Script
 
 //get last scanned item data(code) and last scanned item stock number from DB
 
-$currentDatabaseItemCode = 2353040; //write the DB stuff
+$currentDatabaseItemCode = 2357604; //write the DB stuff
 									
 $currentWebPageItemCode = getCurrentItemCodeFromWebPage();
 

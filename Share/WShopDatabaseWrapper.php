@@ -21,7 +21,8 @@ function databaseInsertScraperRunResults($runTimeMSparam,$numberOfNewEntrysFound
 	//error check
 	if ($conn->connect_error) 
 	{
-		 die("Connection failed: " . $conn->connect_error);
+		die("Connection failed: " . $conn->connect_error);
+		return;
 	}
 
 	//prepare
@@ -64,7 +65,8 @@ function databaseInsertWShopItemListing($itemListing)
 	//error check
 	if ($conn->connect_error) 
 	{
-		 die("Connection failed: " . $conn->connect_error);
+		die("Connection failed: " . $conn->connect_error);
+		return;
 	}
 
 	//prepare
@@ -155,7 +157,8 @@ function databaseUpdateScraperRunInfo($itemListing)
 	//error check
 	if ($conn->connect_error) 
 	{
-		 die("Connection failed: " . $conn->connect_error);
+		die("Connection failed: " . $conn->connect_error);
+		return;		
 	}
 
 	//prepare
@@ -189,16 +192,22 @@ function databaseUpdateScraperRunInfo($itemListing)
 
 function databaseSelectWShopItemListingsFromTheLastXDays($numberOfDays)
 {
+
+	$itemListingsToReturn = array();
+	$itemListingsToReturnPntr = 0;
+
 	//New connection
 	$conn = new mysqli(constant("DB_SERVER"), constant("DB_USER"), constant("DB_USER_PASS"), constant("DB_NAME"));
 
 	//error check
 	if ($conn->connect_error) 
 	{
-		 die("Connection failed: " . $conn->connect_error);
+		die("Connection failed: " . $conn->connect_error);
+		return;
 	}
 
-	$stmt = $conn->prepare("SELECT "
+	$sqlQ = "SELECT "
+		."entryID,"
 		."listingItemCode,"
 		."listingTitle,"
 		."listingTimeLeftAtScrapeTIme,"
@@ -215,28 +224,39 @@ function databaseSelectWShopItemListingsFromTheLastXDays($numberOfDays)
 		."listingDateTimeStampEpoch,"
 		."listingURL"
 
-		." FROM rss_feed WHERE listingDateTimeStampEpoch < ?");
+		." FROM rss_feed WHERE listingDateTimeStampEpoch > ?";
 
-	$result = $stmt->bind_param("i", 
-		$cutOffEpoch, 
+	//echo "".$sqlQ."";
+
+	if($stmt = $conn->prepare($sqlQ.""))
+	{
+	}
+	else
+	{
+   	die("Errormessage: ". $conn->error);
+		return;
+	}
+
+	$result = $stmt->bind_param("i",
+		$listingDateTimeStampEpoch
 	);
 
 	if($result == false)
 	{
-		//error
-		echo "SQL ERROR\n";
+		die("SQL ERROR: ". $conn->error);
 		return;
 	}
 
 	//set real parameters
 
-	$cutOffEpoch 			= time() - ($numberOfDays * (60*60*24));	//epoch seconds
+	$listingDateTimeStampEpoch 			= time() - ($numberOfDays * (60*60*24));	//epoch seconds
 
 
 	$stmt->execute();
 
 	//bind variables to prepared statement
 	$stmt->bind_result(
+		$entryID,
 		$listingItemCode,
 		$listingTitle,
 		$listingTimeLeftAtScrapeTIme,
@@ -257,24 +277,32 @@ function databaseSelectWShopItemListingsFromTheLastXDays($numberOfDays)
 	// fetch values 
 	while ($stmt->fetch()) 
 	{
-		echo "".$listingItemCode."\n";
-		echo "".$listingTitle."\n";
-		echo "".$listingTimeLeftAtScrapeTIme."\n";
-		echo "".$listingCurrentPrice."\n";
-		echo "".$listingBuyItNowPrice."\n";
-		echo "".$listingPostagePrice."\n";
-		echo "".$listingDescription."\n";
-		echo "".$listingImageLinks."\n";
-		echo "".$listingStoreName."\n";
-		echo "".$listingStoreAddress."\n";
-		echo "".$listingStockNumber."\n";
-		echo "".$listingIsAlreadySold."\n";
-		echo "".$listingCategorie."\n";
-		echo "".$listingDateTimeStampEpoch."\n";
-		echo "".$listingURL."\n";
+		$itemListing = new WShopItemListing();
+
+		$itemListing->setIfValid(true);
+
+		$itemListing->setEntryID($entryID);
+		$itemListing->setListingItemCode($listingItemCode);
+		$itemListing->setListingTitle($listingTitle);
+		$itemListing->setListingTimeLeftAtScrapeTIme($listingTimeLeftAtScrapeTIme);
+		$itemListing->setListingCurrentPrice($listingCurrentPrice);
+		$itemListing->setListingBuyItNowPrice($listingBuyItNowPrice);
+		$itemListing->setListingPostagePrice($listingPostagePrice);
+		$itemListing->setListingDescription($listingDescription);
+		$itemListing->setListingImageLinksString($listingImageLinks);
+		$itemListing->setListingStoreName($listingStoreName);
+		$itemListing->setListingStoreAddress($listingStoreAddress);
+		$itemListing->setListingStockNumber($listingStockNumber);
+		$itemListing->setListingIsAlreadySold($listingIsAlreadySold);
+		$itemListing->setListingCategorie($listingCategorie);
+		$itemListing->setListingDateTimeStampEpoch($listingDateTimeStampEpoch);
+		$itemListing->setListingURL($listingURL);
+
+		//$itemListing->printListing();
 
 		//add to Listing Item array
-
+		$itemListingsToReturn[$itemListingsToReturnPntr] = $itemListing;
+		$itemListingsToReturnPntr++;
 	}
 
 	//clean up
@@ -282,6 +310,7 @@ function databaseSelectWShopItemListingsFromTheLastXDays($numberOfDays)
 	$conn->close();
 
 	//return out itemListings
+	return $itemListingsToReturn;
 
 }
 
@@ -290,5 +319,12 @@ Debug
 ******************************************************************************/
 
 //databaseInsertScraperRunResults(5,155);
+/*
+$data = databaseSelectWShopItemListingsFromTheLastXDays(60);
+for($i=0;$i<count($data);$i++)
+{
+	$data[$i]->printListing();
+}
+*/
 
 ?>

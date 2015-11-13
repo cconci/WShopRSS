@@ -12,46 +12,63 @@ require_once '../Share/WShopItemListing.php';
 /******************************************************************************
 Defines
 ******************************************************************************/
-//define("SCRAPER_ERROR",-1);
+date_default_timezone_set('Australia/Victoria');
 
-define('BUILD_DATE',date('r',1458736991)); //epoch of last time I updated the file
+define("BUILD_DATE",date('r',1458736991)); //epoch of last time I updated the file
+define("RSS_RECORD_DAYS_BACK",60);	//how far back the feed is generated in days
 
 /******************************************************************************
 Support Functions
 ******************************************************************************/
 function generateRSSChannelBlockContent()
 {
-	$RSSfeed = "";
+	$RSSFeed = "";
 	$contentDate = date('r');	//From the DB, last scraper run info
 	
-	$RSSfeed .= "		<title>WShop RSS Feed</title>\n";
-	//$RSSfeed .= "		<link>http:// ---- .com</link>";
-	$RSSfeed .= "		<description>RSS Feed for Items of Interest from WShop</description>\n";
-	$RSSfeed .= "		<language>en-us</language>\n";
-	$RSSfeed .= "		<pubDate>".$contentDate."</pubDate>\n"; 
-	$RSSfeed .= "		<lastBuildDate>".$contentDate."</lastBuildDate>\n";
-	//$RSSfeed .= "		<docs>http://blogs.law.harvard.edu/tech/rss</docs>\n";
-	$RSSfeed .= "		<generator>gedit</generator>\n";
-	//$RSSfeed .= "		<managingEditor>editor@example.com</managingEditor>\n";
-	//$RSSfeed .= "		<webMaster>webmaster@example.com</webMaster>\n";
+	$RSSFeed .= "		<title>WShop RSS Feed</title>\n";
+	//$RSSFeed .= "		<link>http:// ---- .com</link>";
+	$RSSFeed .= "		<description>RSS Feed for Items of Interest from WShop</description>\n";
+	$RSSFeed .= "		<language>en-us</language>\n";
+	$RSSFeed .= "		<pubDate>".$contentDate."</pubDate>\n"; 
+	$RSSFeed .= "		<lastBuildDate>".$contentDate."</lastBuildDate>\n";
+	//$RSSFeed .= "		<docs> </docs>\n";
+	$RSSFeed .= "		<generator>gedit</generator>\n";
+	//$RSSFeed .= "		<managingEditor> </managingEditor>\n";
+	//$RSSFeed .= "		<webMaster> </webMaster>\n";
 
-	return $RSSfeed;
+	return $RSSFeed;
 }
 
 function generateRSSItemBlockForWShopItemListing($itemListing)
 {
-	$RSSfeed = "";
-	/*
-      <item>
-         <title>TEXT</title>
-         <link>ITEM URL</link>
-         <description> TEXT</description>
-         <pubDate>Tue, 03 Jun 2003 09:39:21 GMT</pubDate>
-         <guid>ITEM URL</guid>
-      </item>
-	*/
+	$RSSFeed = "";
+	$RSSFeed .= "		<item>\n";
+	$RSSFeed .= "			<title>".$itemListing->getListingTitle()."</title>\n";
+	$RSSFeed .= "			<link>".$itemListing->getListingURL()."</link>\n";
 
-	return $RSSfeed;
+	$RSSFeed .= "			<description>\n";
+	/*
+	The CDATA section allows me to have images and mark up for the content
+	*/
+	$RSSFeed .= "				<![CDATA[\n";
+
+	//Show images
+	$imagesArray = $itemListing->getListingImageLinks();
+	for($i=0;$i<count($imagesArray);$i++)
+	{
+		$RSSFeed .= '					<img src="'.$imagesArray[$i].'" alt="NO DATA" style="width:88px;height:31px;">'."\n";
+	}
+
+	$RSSFeed .= "					<p>".$itemListing->getListingDescription()."</p>\n";
+
+	$RSSFeed .= "				]]>\n";
+	$RSSFeed .= "			</description>\n";
+
+	$RSSFeed .= "			<pubDate>".date('r',$itemListing->getListingDateTimeStampEpoch())."</pubDate>\n";
+	$RSSFeed .= "			<guid>".$itemListing->getEntryID()."</guid>\n";
+	$RSSFeed .= "		</item>\n";
+
+	return $RSSFeed;
 }
 /******************************************************************************
 Main Script
@@ -72,8 +89,13 @@ echo "	<channel>\n";		//Start Channel Block
 echo "".generateRSSChannelBlockContent()."";
 
 //Get items for RSS feed from the Database
+$itmeListingsForFeed = databaseSelectWShopItemListingsFromTheLastXDays(constant("RSS_RECORD_DAYS_BACK"));
 
 //generate the 'item' blocks for the feed
+for($i=0;$i<count($itmeListingsForFeed);$i++)
+{
+	echo "".generateRSSItemBlockForWShopItemListing($itmeListingsForFeed[$i])."";
+}
 
 
 echo "	</channel>\n";		//End Channel Block

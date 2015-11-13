@@ -54,6 +54,10 @@ class WShopItemListing
 	{
 		return $this->valid;
 	}
+	public function getEntryID()
+	{
+		return $this->entryID;
+	}
 	public function getListingItemCode()
 	{
 		return $this->listingItemCode;
@@ -131,6 +135,10 @@ class WShopItemListing
 	{
 		$this->valid = $valid;
 	}
+	public function setEntryID($entryID)
+	{
+		$this->entryID = $entryID;
+	}
 	public function setListingItemCode($itemCode)
 	{
 		$this->listingItemCode = $itemCode;
@@ -162,6 +170,10 @@ class WShopItemListing
 	public function setListingImageLinks($imageLinks)
 	{
 		$this->listingImageLinks = $imageLinks;
+	}
+	public function setListingImageLinksString($imageLinksString)
+	{
+		$this->listingImageLinks = explode(',',$imageLinksString);
 	}
 	public function setListingStoreName($storeName)
 	{
@@ -217,6 +229,8 @@ class WShopItemListing
 		echo "listingURL:".$this->listingURL."\n";
 		echo "listingDateTimeStampEpoch:".$this->listingDateTimeStampEpoch."\n";
 		echo "getlistingImageLinksAsString():".$this->getListingImageLinksAsString()."\n";
+
+		echo "----------------------------------------------------\n";
 	}
 
 }
