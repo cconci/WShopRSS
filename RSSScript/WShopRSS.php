@@ -6,8 +6,14 @@
 Includes
 ******************************************************************************/
 
+//this is for my server as its not the same as the dev machine
+//Debug
 require_once '../Share/WShopDatabaseWrapper.php';
 require_once '../Share/WShopItemListing.php';
+
+//Online
+//require_once '../../../scriptsLocal/WShopRSS/Share/WShopDatabaseWrapper.php';
+//require_once '../../../scriptsLocal/WShopRSS/Share/WShopItemListing.php';
 
 /******************************************************************************
 Defines
@@ -50,7 +56,7 @@ function generateRSSItemBlockForWShopItemListing($itemListing)
 	/*
 	The CDATA section allows me to have images and mark up for the content
 	*/
-	$RSSFeed .= "				<![CDATA[\n";
+	//$RSSFeed .= "				<![CDATA[\n";
 
 	//Show images
 	$imagesArray = $itemListing->getListingImageLinks();
@@ -61,7 +67,7 @@ function generateRSSItemBlockForWShopItemListing($itemListing)
 
 	$RSSFeed .= "					<p>".$itemListing->getListingDescription()."</p>\n";
 
-	$RSSFeed .= "				]]>\n";
+	//$RSSFeed .= "				]]>\n";
 	$RSSFeed .= "			</description>\n";
 
 	$RSSFeed .= "			<pubDate>".date('r',$itemListing->getListingDateTimeStampEpoch())."</pubDate>\n";
@@ -80,7 +86,7 @@ Structure of an RSS Feed,
 */
 
 //Feed Header
-echo "<?xml version=\"1.0\"?>\n";
+echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
 echo "<rss version=\"2.0\">\n";
 
 echo "	<channel>\n";		//Start Channel Block
@@ -100,4 +106,5 @@ for($i=0;$i<count($itmeListingsForFeed);$i++)
 
 echo "	</channel>\n";		//End Channel Block
 echo "</rss>\n";				//End RSS
+
 ?>
