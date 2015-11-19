@@ -1,9 +1,9 @@
-﻿<?php
+<?php
 
 class WShopItemListing 
 {
 	//DB columns
-	private $entryID;	
+	private $entryID;
 	private $valid;
 
 	private $listingItemCode;		//Number in the URL that IDs a product
@@ -234,5 +234,4 @@ class WShopItemListing
 	}
 
 }
-
 ?>
