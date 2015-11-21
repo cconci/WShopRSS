@@ -46,7 +46,7 @@ function generateRSSChannelBlockContent()
 	$RSSFeed .= "      <generator>gedit and Notepad++</generator>\n";
 	//$RSSFeed .= "      <managingEditor> </managingEditor>\n";
 	//$RSSFeed .= "      <webMaster> </webMaster>\n";
-
+	$RSSFeed .= "      <atom:link href=\"".$pageLink."\" rel=\"self\" type=\"application/rss+xml\"/>";
 	return $RSSFeed;
 }
 
@@ -67,7 +67,10 @@ function generateRSSItemBlockForWShopItemListing($itemListing)
 	$imagesArray = $itemListing->getListingImageLinks();
 	for($i=0;$i<count($imagesArray);$i++)
 	{
-		$RSSFeed .= '            <img src="'.$imagesArray[$i].'" alt="NO DATA" style="width:88px;height:31px;">'."\n";
+		if(strlen($imagesArray[$i]) > 0)
+		{
+			$RSSFeed .= '            <img src="'.$imagesArray[$i].'" alt="NO DATA" style="width:88px;height:31px;">'."\n";
+		}
 	}
 
 	$RSSFeed .= "            <p>".$itemListing->getListingDescription()."</p>\n";
@@ -92,7 +95,7 @@ Structure of an RSS Feed,
 
 //Feed Header
 echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-echo "<rss version=\"2.0\">\n";
+echo "<rss version=\"2.0\" xmlns:atom=\"http://www.w3.org/2005/Atom\">\n";
 
 echo "   <channel>\n";		//Start Channel Block
 //generate the channel block content for the feed
