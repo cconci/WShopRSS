@@ -242,6 +242,8 @@ function itemIsOfInterest($itemListing)
 		case 28:
 			return true;
 			break;
+		default:
+			break;
 	}
 
 	//check for key words in title and description
@@ -275,9 +277,19 @@ Main Script
 
 //get last scanned item data(code) and last scanned item stock number from DB
 
-$currentDatabaseItemCode = 2357604; //write the DB stuff
+$currentDatabaseItemCode = databaseGetScraperRunInfoLastScrapedItemCode();
 									
 $currentWebPageItemCode = getCurrentItemCodeFromWebPage();
+
+//Sanity check
+if(	$currentDatabaseItemCode == 0
+	||	(($currentWebPageItemCode - $currentDatabaseItemCode) < 0)   // should never go backwards
+	|| (($currentWebPageItemCode - $currentDatabaseItemCode) > 300) //to big give up
+	)
+{
+	//Error out
+	exit("Error:END OF SCRIPT");
+}
 
 echo "Web Page current item code:".$currentWebPageItemCode."\n";
 

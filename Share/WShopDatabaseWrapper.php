@@ -190,6 +190,74 @@ function databaseUpdateScraperRunInfo($itemListing)
 	$conn->close();
 }
 
+function databaseGetScraperRunInfoLastScrapedItemCode()
+{
+	$returnValue = 0;
+	$itemListingsToReturnPntr = 0;
+
+	//New connection
+	$conn = new mysqli(constant("DB_SERVER"), constant("DB_USER"), constant("DB_USER_PASS"), constant("DB_NAME"));
+
+	//error check
+	if ($conn->connect_error) 
+	{
+		die("Connection failed: " . $conn->connect_error);
+		return;
+	}
+
+	$sqlQ = "SELECT "
+		."lastScrapedItemCode"
+
+		." FROM scraper_info WHERE rowID = ?";
+
+	//echo "".$sqlQ."";
+
+	if($stmt = $conn->prepare($sqlQ.""))
+	{
+	}
+	else
+	{
+   	die("Errormessage: ". $conn->error);
+		return;
+	}
+
+	$result = $stmt->bind_param("i",
+		$rowID
+	);
+
+	if($result == false)
+	{
+		die("SQL ERROR: ". $conn->error);
+		return;
+	}
+
+	//set real parameters
+
+	$rowID 			= 1;
+
+
+	$stmt->execute();
+
+	//bind variables to prepared statement
+	$stmt->bind_result(
+		$lastScrapedItemCode
+	);
+
+	// fetch values 
+	while ($stmt->fetch()) 
+	{
+		$returnValue = $lastScrapedItemCode;
+		$itemListingsToReturnPntr++;
+	}
+
+	//clean up
+	$stmt->close();
+	$conn->close();
+
+	//return our last Item code
+	return $returnValue;
+}
+
 function databaseSelectWShopItemListingsFromTheLastXDays($numberOfDays)
 {
 
