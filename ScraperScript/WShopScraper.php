@@ -237,10 +237,17 @@ function getItemInfoFromWebPage($itemCode)
 function itemIsOfInterest($itemListing)
 {
 	//check for Categories I want
+	switch($itemListing->getListingCategorie())
+	{
+		case 28:
+			return true;
+			break;
+	}
 
 	//check for key words in title and description
+	
 
-	return true;
+	return false;
 }
 
 function cleanWhiteSpaceFromStartOfEachLine($str)
