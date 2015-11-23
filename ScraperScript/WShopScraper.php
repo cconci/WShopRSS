@@ -13,6 +13,8 @@ require_once '../Share/WShopItemListing.php';
 /******************************************************************************
 Defines
 ******************************************************************************/
+date_default_timezone_set('Australia/Victoria');
+
 define("SCRAPER_ERROR",-1);
 
 /******************************************************************************
@@ -275,7 +277,10 @@ function cleanWhiteSpaceFromStartOfEachLine($str)
 Main Script
 ******************************************************************************/
 
+$startTime = time();
+
 //get last scanned item data(code) and last scanned item stock number from DB
+$newItemsFound = 0;
 
 $currentDatabaseItemCode = databaseGetScraperRunInfoLastScrapedItemCode();
 									
@@ -315,6 +320,7 @@ if($currentWebPageItemCode != constant("SCRAPER_ERROR"))
 				//Update the last scrape table
 				databaseUpdateScraperRunInfo($itemDetails);
 
+				$newItemsFound++;
 			}
 		}
 
@@ -327,7 +333,12 @@ else
 	//Page scrape failed
 }
 
+$endTime = time();
+
+$runTIme = $endTime - $startTime;
+
 //update stats table for run info
+databaseInsertScraperRunResults($runTIme,$newItemsFound);
 
 echo "Done!!!\n"
 

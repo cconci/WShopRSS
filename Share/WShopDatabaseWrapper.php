@@ -26,7 +26,7 @@ function databaseInsertScraperRunResults($runTimeMSparam,$numberOfNewEntrysFound
 	}
 
 	//prepare
-	$stmt = $conn->prepare("INSERT INTO scraper_run_results (dateTimeStampEpoch, runTimeMS, numberOfNewEntrysFound) VALUES (?, ?, ?)");
+	$stmt = $conn->prepare("INSERT INTO scraper_run_results (dateTimeStampEpoch, runTimeMS, numberOfNewEntrysFound,dateTimeStampCC) VALUES (?, ?, ?, ?)");
 
 	/*
 		options,
@@ -36,16 +36,18 @@ function databaseInsertScraperRunResults($runTimeMSparam,$numberOfNewEntrysFound
 			b - BLOB
 	*/
 	//Bind, the all are int so we use 'i'
-	$stmt->bind_param("iii", 
+	$stmt->bind_param("iiis", 
 		$dateTimeStampEpoch, 
 		$runTimeMS, 
-		$numberOfNewEntrysFound
+		$numberOfNewEntrysFound,
+		$dateTimeStampCC
 	);
 
 	//set real parameters
 	$dateTimeStampEpoch 			= time();	//epoch seconds
 	$runTimeMS 						= $runTimeMSparam;
 	$numberOfNewEntrysFound 	= $numberOfNewEntrysFoundparam;
+	$dateTimeStampCC				= date("YmdHis");
 
 	$stmt->execute();
 	
