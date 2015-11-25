@@ -56,6 +56,70 @@ function databaseInsertScraperRunResults($runTimeMSparam,$numberOfNewEntrysFound
 	$conn->close();
 }
 
+function databaseInsertRssAceesInfo($serverClinetIp,$serverFwd,$serverQueryStr,$serverRemote,$serverUserAgent,$sizeOfServedData,$getVarDump)
+{
+	//New connection
+	$conn = new mysqli(constant("DB_SERVER"), constant("DB_USER"), constant("DB_USER_PASS"), constant("DB_NAME"));
+
+	//error check
+	if ($conn->connect_error) 
+	{
+		die("Connection failed: " . $conn->connect_error);
+		return;
+	}
+
+	//prepare
+	$stmt = $conn->prepare("INSERT INTO rss_feed_access ("
+			."dateTimeStampCC, "
+			."dateTimeStampEpoch, "
+			."serverClientIp,"
+			."serverForwarded,"
+			."serverQueryString,"
+			."serverRemoteAddress,"
+			."serverUserAgent,"
+			."sizeOfServedData,"
+			."getVarDump"
+			.") "
+			."VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+
+	/*
+		options,
+			i - integer
+			d - double
+			s - string
+			b - BLOB
+	*/
+	//Bind, the all are int so we use 'i'
+	$stmt->bind_param("sisssssis", 
+		$dateTimeStampCC, 
+		$dateTimeStampEpoch, 
+		$serverClientIp,
+		$serverForwarded,
+		$serverQueryString,
+		$serverRemoteAddress,
+		$serverUserAgent,
+		$sizeOfServedData,
+		$getVarDump
+	);
+
+	//set real parameters
+	$dateTimeStampCC				= date("YmdHis");
+	$dateTimeStampEpoch 			= time();	//epoch seconds
+	$serverClientIp				= $serverClinetIp;
+	$serverForwarded				= $serverFwd;
+	$serverQueryString			= $serverQueryStr;
+	$serverRemoteAddress			= $serverRemote;
+	$serverUserAgent				= $serverUserAgent;
+	$sizeOfServedData				= $sizeOfServedData;
+	$getVarDump						= $getVarDump;
+
+	$stmt->execute();
+	
+	//clean up
+	$stmt->close();
+	$conn->close();
+}
+
 /*
 Takes an 'wShopItemListing' onject as a param and adds it to the database
 */

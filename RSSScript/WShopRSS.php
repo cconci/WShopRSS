@@ -80,6 +80,10 @@ function generateRSSItemBlockForWShopItemListing($itemListing)
 			$RSSFeed .= '            <img src="'.$imagesArray[$i].'" alt="NO DATA" style="width:88px;height:31px;">'."\n";
 		}
 	}
+	//Price info
+	$RSSFeed .= "            <p>".$itemListing->getListingCurrentPrice()
+					."(".$itemListing->getListingBuyItNowPrice().")"
+					."+".$itemListing->getListingPostagePrice().""."</p>\n";		
 
 	$RSSFeed .= "            <p>".$itemListing->getListingDescription()."</p>\n";
 
@@ -122,8 +126,44 @@ for($i=0;$i<count($itmeListingsForFeed);$i++)
 echo "   </channel>\n";		//End Channel Block
 echo "</rss>\n";				//End RSS
 
+//Update Access Stats
+
+$serverClinetIp = "Not Set";
+$serverFwd = "Not Set";
+$serverQueryStr = "Not Set";
+$serverRemote = "Not Set";
+$serverUserAgent = "Not Set";
 
 
+if(isset($_SERVER['HTTP_CLIENT_IP']))
+{
+	$serverClinetIp = $_SERVER['HTTP_CLIENT_IP'];
+}
+if(isset($_SERVER['HTTP_X_FORWARDED_FOR']))
+{
+	$serverFwd = $_SERVER['HTTP_X_FORWARDED_FOR'];
+}
+if(isset($_SERVER['REMOTE_ADDR']))
+{
+	$serverQueryStr = $_SERVER['REMOTE_ADDR'];
+}
+if(isset($_SERVER['QUERY_STRING']))
+{
+	$serverRemote = $_SERVER['QUERY_STRING'];
+}
+if(isset($_SERVER['HTTP_USER_AGENT']))
+{
+	$serverUserAgent = $_SERVER['HTTP_USER_AGENT'];
+}
+
+$sizeOfServedData = 0;
+
+//dump of request str
+ob_start();
+var_dump($_GET);
+$getVarDump = ob_get_clean();
+
+databaseInsertRssAceesInfo($serverClinetIp,$serverFwd,$serverQueryStr,$serverRemote,$serverUserAgent,$sizeOfServedData,$getVarDump);
 
 
 ?>
