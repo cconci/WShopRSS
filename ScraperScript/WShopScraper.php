@@ -293,11 +293,11 @@ $currentWebPageItemCode = getCurrentItemCodeFromWebPage();
 //Sanity check
 if(	$currentDatabaseItemCode == 0
 	||	(($currentWebPageItemCode - $currentDatabaseItemCode) < 0)   // should never go backwards
-	|| (($currentWebPageItemCode - $currentDatabaseItemCode) > 300) //to big give up
+	|| (($currentWebPageItemCode - $currentDatabaseItemCode) > 6000) //to big give up
 	)
 {
 	//Error out
-	exit("Error:END OF SCRIPT");
+	exit("Error:END OF SCRIPT- Range Error");
 }
 
 echo "Web Page current item code:".$currentWebPageItemCode."\n";
