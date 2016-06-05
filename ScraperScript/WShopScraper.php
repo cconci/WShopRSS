@@ -6,10 +6,6 @@
 Includes
 ******************************************************************************/
 
-//for online
-//set_include_path("/home/chriscon/public_html/WShopRSS/ScraperScript/");  
-//ini_set("include_path", "/home/chriscon/public_html/WShopRSS/ScraperScript");  
-
 require_once 'WShopDefines.php';
 require_once '../Share/WShopDatabaseWrapper.php';
 require_once '../Share/WShopItemListing.php';
