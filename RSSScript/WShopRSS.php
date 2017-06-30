@@ -9,6 +9,11 @@ Feed Validates here as of 08/04/2016
 
 */
 
+/******************************************************************************
+Settings
+******************************************************************************/
+//Send a raw HTTP header - required to validate feed
+header('Content-Type: text/xml');
 
 /******************************************************************************
 Includes
@@ -32,7 +37,7 @@ Defines
 date_default_timezone_set('Australia/Victoria');
 
 define("BUILD_DATE",date('r',1458736991)); //epoch of last time I updated the file
-define("RSS_RECORD_DAYS_BACK",60);	//how far back the feed is generated in days
+define("RSS_RECORD_DAYS_BACK",3);	//how far back the feed is generated in days
 
 /******************************************************************************
 Support Functions
